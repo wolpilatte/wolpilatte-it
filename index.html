@@ -468,24 +468,24 @@
     </div>
     <div class="skills-wrap">
       <div class="skill reveal">
-        <div class="top"><span class="name">HTML & CSS</span><span class="pct" data-target="90">0%</span></div>
-        <div class="bar"><div class="bar-fill" data-w="90%"></div></div>
+        <div class="top"><span class="name">HTML & CSS</span><span class="pct" data-target="80">0%</span></div>
+        <div class="bar"><div class="bar-fill" data-w="80%"></div></div>
       </div>
       <div class="skill reveal" data-delay="1">
         <div class="top"><span class="name">JavaScript</span><span class="pct" data-target="70">0%</span></div>
         <div class="bar"><div class="bar-fill" data-w="70%"></div></div>
       </div>
       <div class="skill reveal" data-delay="2">
-        <div class="top"><span class="name">Python</span><span class="pct" data-target="75">0%</span></div>
-        <div class="bar"><div class="bar-fill" data-w="75%"></div></div>
+        <div class="top"><span class="name">Python</span><span class="pct" data-target="65">0%</span></div>
+        <div class="bar"><div class="bar-fill" data-w="65%"></div></div>
       </div>
       <div class="skill reveal" data-delay="3">
-        <div class="top"><span class="name">Flutter & Dart</span><span class="pct" data-target="70">0%</span></div>
-        <div class="bar"><div class="bar-fill" data-w="70%"></div></div>
+        <div class="top"><span class="name">Flutter & Dart</span><span class="pct" data-target="60">0%</span></div>
+        <div class="bar"><div class="bar-fill" data-w="60%"></div></div>
       </div>
       <div class="skill reveal" data-delay="4">
-        <div class="top"><span class="name">Java</span><span class="pct" data-target="45">0%</span></div>
-        <div class="bar"><div class="bar-fill" data-w="45%"></div></div>
+        <div class="top"><span class="name">Java</span><span class="pct" data-target="50">0%</span></div>
+        <div class="bar"><div class="bar-fill" data-w="50%"></div></div>
       </div>
     </div>
     <div class="tech-tags reveal">
@@ -652,8 +652,15 @@
     entries.forEach(en=>{
       if(en.isIntersecting){
         en.target.classList.add('visible');
-        // trigger skills bar
         en.target.querySelectorAll('.bar-fill').forEach(b=>{b.style.width=b.dataset.w;});
+        en.target.querySelectorAll('.pct').forEach(p=>{
+          const t=+p.dataset.target,dur=900,t0=performance.now();
+          (function tick(now){
+            const pr=Math.min((now-t0)/dur,1);
+            p.textContent=Math.round(t*(1-Math.pow(1-pr,3)))+'%';
+            if(pr<1)requestAnimationFrame(tick);
+          })(t0);
+        });
         io.unobserve(en.target);
       }
     });
