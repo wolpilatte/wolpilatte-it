@@ -160,23 +160,14 @@
   .avatar-inner{width:80%;height:80%;border-radius:24px;background:linear-gradient(160deg,var(--accent),var(--accent3));position:relative;overflow:hidden}
   .avatar-inner svg{width:100%;height:100%;transform:scale(1.02)}
   .float-chip{
-    position:absolute;display:flex;align-items:center;gap:8px;padding:13px 20px;border-radius:6px;
-    font-size:13px;font-weight:600;color:var(--text);overflow:hidden;white-space:nowrap;
-    background:linear-gradient(145deg,rgba(30,30,52,.92),rgba(18,18,31,.92));
-    backdrop-filter:blur(10px);box-shadow:0 14px 36px rgba(0,0,0,.5);
+    position:absolute;display:flex;align-items:baseline;gap:6px;padding:10px 16px;border-radius:14px;
+    font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;
+    background:rgba(18,18,31,.92);border:1px solid var(--line);backdrop-filter:blur(8px);
   }
   .chip-1{top:6%;left:-6%;animation:bob 5s ease-in-out infinite}
   .chip-2{bottom:14%;right:-6%;animation:bob 5s ease-in-out -2s infinite}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-  .float-chip::before,.float-chip::after{content:'';position:absolute;width:16px;height:16px;border:2px solid #00d4ff;filter:drop-shadow(0 0 6px rgba(0,212,255,.8))}
-  .float-chip::before{top:5px;left:5px;border-right:0;border-bottom:0}
-  .float-chip::after{bottom:5px;right:5px;border-left:0;border-top:0}
-  .chip-shine{position:absolute;top:0;left:-70%;width:45%;height:100%;pointer-events:none;
-    background:linear-gradient(105deg,transparent,rgba(255,255,255,.28),transparent);
-    transform:skewX(-22deg);animation:shine 3.2s ease-in-out infinite}
-  @keyframes shine{0%,55%{left:-70%}85%,100%{left:130%}}
-  .float-chip em{font-style:normal;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;
-    background:linear-gradient(135deg,#c9bcff,#00d4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .float-chip em{font-style:normal;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--text)}
 
   .scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:.15em;text-transform:uppercase}
   .mouse{width:24px;height:38px;border:2px solid var(--muted);border-radius:14px;position:relative}
@@ -264,12 +255,13 @@
   /* ---------- stats ---------- */
   .stats-band{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;box-shadow:var(--shadow);
+    padding:34px 40px;display:grid;grid-template-columns:repeat(2,1fr);gap:20px;box-shadow:var(--shadow);
   }
-  .stat{text-align:center;position:relative}
+  .stat{text-align:center}
+  .stat + .stat{position:relative}
   .stat + .stat::before{content:'';position:absolute;left:-10px;top:20%;height:60%;width:1px;background:var(--line)}
-  .stat .num{font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,4vw,48px);font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .stat .label{color:var(--muted);font-size:13.5px;margin-top:4px}
+  .stat .num{font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,4vw,44px);font-weight:700;color:var(--text)}
+  .stat .label{color:var(--muted);font-size:14px;margin-top:4px}
 
   /* ---------- timeline ---------- */
   .timeline{position:relative;max-width:760px;margin:auto;padding-left:30px}
@@ -402,8 +394,8 @@
             <img src="profil.jpeg" alt="Photo of Wolpilatte" style="width:100%;height:100%;object-fit:cover;display:block">
           </div>
         </div>
-        <div class="float-chip chip-1"><span class="chip-shine"></span><em>3+</em> years experience</div>
-        <div class="float-chip chip-2"><span class="chip-shine"></span><em>15+</em> projects</div>
+        <div class="float-chip chip-1"><em>3+</em> years experience</div>
+        <div class="float-chip chip-2"><em>15+</em> projects</div>
       </div>
     </div>
   </div>
@@ -519,10 +511,8 @@
 <section style="padding-top:20px;padding-bottom:20px">
   <div class="container">
     <div class="stats-band reveal">
-      <div class="stat"><div class="num" data-count="3">0</div><div class="label">Years of Experience</div></div>
-      <div class="stat"><div class="num" data-count="25">0</div><div class="label">Projects Completed</div></div>
-      <div class="stat"><div class="num" data-count="15">0</div><div class="label">Happy Clients</div></div>
-      <div class="stat"><div class="num" data-count="10">0</div><div class="label">Awards</div></div>
+      <div class="stat"><div class="num">3+</div><div class="label">Years of Experience</div></div>
+      <div class="stat"><div class="num">15+</div><div class="label">Projects Completed</div></div>
     </div>
   </div>
 </section>
@@ -606,24 +596,6 @@
     });
   },{threshold:.18});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-
-  // ---------- counters ----------
-  const cio=new IntersectionObserver(entries=>{
-    entries.forEach(en=>{
-      if(!en.isIntersecting) return;
-      const el=en.target;
-      const target=+el.dataset.count;
-      const dur=1600,t0=performance.now();
-      (function tick(t){
-        const p=Math.min((t-t0)/dur,1);
-        const ease=1-Math.pow(1-p,3);
-        el.textContent=Math.round(target*ease);
-        if(p<1)requestAnimationFrame(tick);
-      })(t0);
-      cio.unobserve(el);
-    });
-  },{threshold:.6});
-  document.querySelectorAll('[data-count]').forEach(el=>cio.observe(el));
 
   // ---------- nav active link ----------
   const sections=[...document.querySelectorAll('section[id],header[id]')];
