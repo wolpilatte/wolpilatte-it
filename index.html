@@ -169,6 +169,67 @@
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
   .float-chip em{font-style:normal;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--text)}
 
+  /* ---------- interactive wolf ears ---------- */
+  .avatar-stage{position:relative;display:inline-block}
+  .wolf-ear{
+    --pull:0;
+    position:absolute;bottom:calc(100% - 22px);z-index:3;
+    width:clamp(52px,9vw,76px);height:clamp(58px,10vw,84px);
+    cursor:grab;touch-action:none;user-select:none;
+    transform-origin:50% 100%;will-change:transform;
+    filter:drop-shadow(0 8px 16px rgba(0,0,0,.45));
+  }
+  .wolf-ear.ear-left{left:13%}
+  .wolf-ear.ear-right{right:13%}
+  .wolf-ear:active{cursor:grabbing}
+  .ear-tilt,.ear-idle{width:100%;height:100%;transform-origin:50% 96%}
+  .ear-left .ear-tilt{transform:rotate(-15deg)}
+  .ear-right .ear-tilt{transform:rotate(15deg)}
+  .ear-idle{animation:earIdle 4s ease-in-out infinite}
+  .ear-right .ear-idle{animation-delay:-1.6s}
+  @keyframes earIdle{
+    0%,100%{transform:rotate(0) translateY(0)}
+    30%{transform:rotate(5deg) translateY(-2px)}
+    65%{transform:rotate(-4deg) translateY(-1px)}
+  }
+  .ear-shape{
+    width:100%;height:100%;position:relative;display:grid;place-items:center;
+    background:linear-gradient(160deg,#4a4370,#282238);
+    border:2px solid rgba(124,92,255,.55);
+    border-radius:60% 12% 60% 12%;
+    transform:rotate(45deg) scaleY(1.08);
+    box-shadow:inset 0 -12px 20px rgba(124,92,255,.22),inset 0 6px 12px rgba(255,255,255,.06);
+    transition:transform .12s ease-out;
+  }
+  .ear-inner{
+    width:44%;height:60%;border-radius:50%;
+    background:linear-gradient(180deg,#ffb3d1,#b86bd8);
+    box-shadow:inset 0 0 10px rgba(255,255,255,.35);
+    opacity:.92;
+  }
+  .wolf-ear.dragging .ear-shape{
+    transform:rotate(45deg) scaleY(calc(1.08 - var(--pull) * 0.22)) scaleX(calc(1 + var(--pull) * 0.18));
+  }
+  .wolf-ear.released .ear-shape{animation:earBoing .6s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes earBoing{
+    0%{transform:rotate(45deg) scaleY(1.08) scaleX(1)}
+    30%{transform:rotate(45deg) scaleY(.86) scaleX(1.16)}
+    62%{transform:rotate(45deg) scaleY(1.16) scaleX(.94)}
+    100%{transform:rotate(45deg) scaleY(1.08) scaleX(1)}
+  }
+  .ear-hint{
+    position:absolute;bottom:calc(100% + 30px);left:50%;transform:translate(-50%,-8px);
+    font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--accent2);
+    background:rgba(18,18,31,.9);border:1px solid rgba(0,212,255,.35);
+    padding:4px 10px;border-radius:99px;white-space:nowrap;pointer-events:none;z-index:5;
+    opacity:0;animation:earHint 6s ease-in-out 1.2s 1 forwards;
+  }
+  @keyframes earHint{
+    0%,8%{opacity:0;transform:translate(-50%,0)}
+    18%,72%{opacity:1;transform:translate(-50%,-8px)}
+    100%{opacity:0;transform:translate(-50%,-16px)}
+  }
+
   .scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:.15em;text-transform:uppercase}
   .mouse{width:24px;height:38px;border:2px solid var(--muted);border-radius:14px;position:relative}
   .mouse::after{content:'';position:absolute;left:50%;top:7px;width:4px;height:8px;margin-left:-2px;border-radius:4px;background:var(--accent2);animation:wheel 1.6s infinite}
@@ -424,9 +485,18 @@
       </div>
 
       <div class="hero-visual reveal" data-delay="2">
-        <div class="avatar-wrap">
-          <div class="avatar-inner">
-            <img src="profil.jpeg" alt="Photo of Wolpilatte" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div class="avatar-stage">
+          <span class="ear-hint">pull me!</span>
+          <div class="wolf-ear ear-left" data-ear="left">
+            <div class="ear-tilt"><div class="ear-idle"><div class="ear-shape"><span class="ear-inner"></span></div></div></div>
+          </div>
+          <div class="wolf-ear ear-right" data-ear="right">
+            <div class="ear-tilt"><div class="ear-idle"><div class="ear-shape"><span class="ear-inner"></span></div></div></div>
+          </div>
+          <div class="avatar-wrap">
+            <div class="avatar-inner">
+              <img src="profil.jpeg" alt="Photo of Wolpilatte" style="width:100%;height:100%;object-fit:cover;display:block">
+            </div>
           </div>
         </div>
         <div class="float-chip chip-1"><em>3+</em> years experience</div>
@@ -708,6 +778,45 @@
       c.style.transform=`translateY(${y*.12*(i%2?1:-1)}px)`;
     });
   },{passive:true});
+
+  // ---------- interactive wolf ears ----------
+  document.querySelectorAll('.wolf-ear').forEach(ear=>{
+    let dragging=false, sx=0, sy=0, pid=null;
+    const idle=ear.querySelector('.ear-idle');
+    const dir=ear.classList.contains('ear-left')?-1:1;
+
+    const down=e=>{
+      if(e.button!==undefined && e.button!==0) return;
+      dragging=true; sx=e.clientX; sy=e.clientY; pid=e.pointerId;
+      try{ ear.setPointerCapture(pid); }catch(_){}
+      ear.classList.add('dragging'); ear.classList.remove('released');
+      ear.style.transition='none';
+      if(idle) idle.style.animationPlayState='paused';
+      e.preventDefault();
+    };
+    const move=e=>{
+      if(!dragging) return;
+      const dx=e.clientX-sx, dy=e.clientY-sy;
+      const pull=Math.min(Math.hypot(dx,dy),170);
+      ear.style.transform=`translate(${dx*0.5}px,${dy*0.5}px) rotate(${dx*0.1*dir}deg) scale(${1+Math.min(pull*0.0016,0.2)})`;
+      ear.style.setProperty('--pull',(pull/170).toFixed(3));
+    };
+    const up=()=>{
+      if(!dragging) return;
+      dragging=false;
+      ear.classList.remove('dragging'); ear.classList.add('released');
+      ear.style.transition='transform .6s cubic-bezier(.34,1.56,.64,1)';
+      ear.style.transform='';
+      ear.style.setProperty('--pull',0);
+      setTimeout(()=>{ if(idle) idle.style.animationPlayState=''; },600);
+      setTimeout(()=>{ ear.classList.remove('released'); ear.style.transition=''; },700);
+    };
+    ear.addEventListener('pointerdown',down);
+    ear.addEventListener('pointermove',move);
+    ear.addEventListener('pointerup',up);
+    ear.addEventListener('pointercancel',up);
+    ear.addEventListener('lostpointercapture',up);
+  });
 
 })();
 </script>
